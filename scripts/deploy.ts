@@ -13,10 +13,9 @@ async function main() {
     TOTAL_SUPPLY,
     "MTK"  
   );
-  await token.deployed();
 
+  await token.deployed();
   const router = await ethers.getContractAt("IPancakeRouter02", ROUTER);
-  
   await token.approve(router.address, TOTAL_SUPPLY);
 
   let response = await router.addLiquidityETH(
@@ -30,24 +29,15 @@ async function main() {
   response.wait(1);
 
   let factory = await ethers.getContractAt("IUniswapV2Factory", FACTORY);
-
   let liquidityPoolAddress = ethers.constants.AddressZero;
 
-  // Wait until the address to returned (I don't know why because I wait confirmations...)
   while (liquidityPoolAddress == ethers.constants.AddressZero) {
     liquidityPoolAddress = await factory.getPair(token.address, WBNB);
   } 
 
-  console.log(`Liquidity pool address : ${liquidityPoolAddress}`);
-
   await token.setLiquidityPool(liquidityPoolAddress);
-
-  console.log(`Liquidity pool set successfully`);
 }
 
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
